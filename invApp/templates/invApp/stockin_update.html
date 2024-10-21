@@ -1,0 +1,62 @@
+{% extends "invApp/layout.html" %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block title %}StockIn Index{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="{% static 'js/scripts.js' %}"></script>
+</head>
+<body>
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box">
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="{% url 'stockin_list' %}">StockIns</a></li>
+                            <li class="breadcrumb-item active">Update StockIn</li>
+                        </ol>
+                    </div>
+                    <h4 class="page-title">Update StockIn</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row" style="margin-left:30px">
+                            <div class="col-xl-6">
+
+                                <form method="post" enctype="multipart/form-data">
+                                    {% csrf_token %}
+
+                                    <!-- Render form fields using Django's form API -->
+                                    {{ form.as_p }}
+
+                                    <div class="btn-group mb-2 ms-2">
+                                        <button style="width:130px; font-size:large" type="submit" class="btn btn-primary btn-sm">Update</button> &nbsp; &nbsp;
+                                        <a href="{% url 'stockin_list' %}" class="btn btn-outline-secondary">Back To List</a>
+                                    </div>
+                                </form>
+
+                            </div> <!-- end col -->
+                        </div> <!-- end row -->
+                    </div> <!-- end card-body -->
+                </div> <!-- end card -->
+            </div> <!-- end col -->
+        </div> <!-- end row -->
+    </div> <!-- container -->
+</div> <!-- content -->
+
+{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,737 @@
+{% extends "invApp/layout.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block title %}Product Index{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+    <script src="{% static 'js/scripts.js' %}"></script>
+</head>
+<body>
+
+
+<div class="content">
+    <div class="container-fluid">
+        <!-- start page title -->
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box">
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Barcode Scan</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end page title -->
+
+        <div class="row">
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="header-title mb-3">Entry Section:</h4>
+                        <div id="basicwizard">
+                            <ul class="nav nav-pills nav-justified form-wizard-header mb-4">
+                                <li class="nav-item">
+                                    <a id="orderout-btn" href="#basictab1" class="nav-link rounded-0 py-2">
+                                        <i class="mdi mdi-account-circle font-18 align-middle me-1"></i>
+                                        <span class="d-none d-sm-inline">OrderOut</span>
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a id="return-btn" href="#basictab2" class="nav-link rounded-0 py-2">
+                                        <i class="mdi mdi-face-man-profile font-18 align-middle me-1"></i>
+                                        <span class="d-none d-sm-inline">Returnss</span>
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a id="damagereturn-btn" href="#basictab3" class="nav-link rounded-0 py-2">
+                                        <i class="mdi mdi-face-man-profile font-18 align-middle me-1"></i>
+                                        <span class="d-none d-sm-inline">DamageReturn</span>
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a id="shipmentout-btn" href="#basictab4" class="nav-link rounded-0 py-2">
+                                        <i class="mdi mdi-face-man-profile font-18 align-middle me-1"></i>
+                                        <span class="d-none d-sm-inline">ShipmentOut</span>
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a id="shipmentin-btn" href="#basictab5" class="nav-link rounded-0 py-2">
+                                        <i class="mdi mdi-face-man-profile font-18 align-middle me-1"></i>
+                                        <span class="d-none d-sm-inline">ShipmentIn</span>
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <!-- OrderOut Form -->
+                            <form id="orderout-form" style="display:none;" method="POST" action="{% url 'submit_order' %}">
+                                {% csrf_token %}
+
+
+                                <div class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="barcode-input-orderout">Scan Barcode:</label>
+                                    <div class="col-md-9">
+                                        <input type="text" id="barcode-input-orderout" name="barcode" class="form-control">
+                                    </div>
+                                </div>
+                                <div hidden class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="product-name">Product:</label>
+                                    <div class="col-md-9">
+                                        <input placeholder="Auto-Filled" type="text" id="product-name" name="product-name" class="form-control" readonly>
+                                    </div>
+                                </div>
+                                <div hidden class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="quantity">Quantity:</label>
+                                    <div class="col-md-9">
+                                        <input type="number" id="quantity" name="quantity" class="form-control" value="1" min="1" readonly>
+                                    </div>
+                                </div>
+                                <!-- Date Input -->
+                                <div hidden class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="date">Date:</label>
+                                    <div class="col-md-9">
+                                        <input type="text" id="datepicker" name="date" class="form-control datepicker" placeholder="dd/mm/yyyy" readonly>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="orderType" value="orderout">
+                                <button hidden class="btn btn-primary" type="submit">Submit OrderOut</button>
+                            </form>
+
+                            <!-- Return Form -->
+                            <form id="return-form" style="display:none;" method="POST" action="{% url 'submit_order' %}">
+                                {% csrf_token %}
+
+                                <div class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="barcode-input-return">Scan Barcode:</label>
+                                    <div class="col-md-9">
+                                        <input type="text" id="barcode-input-return" name="barcode" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div hidden class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="product-name-return">Product:</label>
+                                    <div class="col-md-9">
+                                        <input placeholder="Auto-Filled" type="text" id="product-name-return" name="product-name" class="form-control" readonly>
+                                    </div>
+                                </div>
+
+                               <div hidden class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="quantity-return">Quantity:</label>
+                                    <div class="col-md-9">
+                                        <input type="number" id="quantity-return" name="quantity" class="form-control" value="1" min="1">
+                                    </div>
+                                </div>
+
+                                <div hidden class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="date-return">Date:</label>
+                                    <div class="col-md-9">
+                                        <input type="text" id="datepicker-return" name="date" class="form-control datepicker" placeholder="dd/mm/yyyy">
+                                    </div>
+                                </div>
+
+                                <input type="hidden" name="orderType" value="return">
+                                <button hidden class="btn btn-primary" type="submit">Submit Return</button>
+                            </form>
+
+                            <form id="damagereturn-form" style="display:none;" method="POST" action="{% url 'submit_order' %}">
+                                {% csrf_token %}
+
+                                <div class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="barcode-input-damagereturn">Scan Barcode:</label>
+                                    <div class="col-md-9">
+                                        <input type="text" id="barcode-input-damagereturn" name="barcode" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div hidden class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="product-name-damagereturn">Product:</label>
+                                    <div class="col-md-9">
+                                        <input placeholder="Auto-Filled" type="text" id="product-name-damagereturn" name="product-name" class="form-control" readonly>
+                                    </div>
+                                </div>
+
+                               <div hidden class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="quantity-damagereturn">Quantity:</label>
+                                    <div class="col-md-9">
+                                        <input type="number" id="quantity-damagereturn" name="quantity" class="form-control" value="1" min="1">
+                                    </div>
+                                </div>
+
+                                <div hidden class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="date-damagereturn">Date:</label>
+                                    <div class="col-md-9">
+                                        <input type="text" id="datepicker-damagereturn" name="date" class="form-control datepicker" placeholder="dd/mm/yyyy">
+                                    </div>
+                                </div>
+
+                                <input type="hidden" name="orderType" value="damagereturn">
+                                <button hidden class="btn btn-primary" type="submit">Submit DamageReturn</button>
+                            </form>
+
+
+                            <form id="shipmentout-form" style="display:none;" method="POST" action="{% url 'submit_order' %}">
+                                {% csrf_token %}
+                                <div class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="barcode-input-return">Scan Barcode:</label>
+                                    <div class="col-md-9">
+                                        <input type="text" id="barcode-input-shipmentout" name="barcode" class="form-control">
+                                    </div>
+                                </div>
+                                <div hidden class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="product-name-return">Product:</label>
+                                    <div class="col-md-9">
+                                        <input placeholder="Auto-Filled" type="text" id="product-name-shipmentout" name="product-name" class="form-control" readonly>
+                                    </div>
+                                </div>
+                                <div hidden class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="quantity-return">Quantity:</label>
+                                    <div class="col-md-9">
+                                        <input type="number" id="quantity-shipmentout" name="quantity" class="form-control" value="1" min="1">
+                                    </div>
+                                </div>
+                                <!-- Date Input -->
+                                <div hidden class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="date-shipmentout">Date:</label>
+                                    <div class="col-md-9">
+                                        <input type="text" id="datepicker-shipmentout" name="date" class="form-control datepicker" placeholder="dd/mm/yyyy">
+                                    </div>
+                                </div>
+                                <input type="hidden" name="orderType" value="shipmentout">
+                                <button hidden class="btn btn-primary" type="submit">Submit ShipmentOut</button>
+                            </form>
+
+
+                            <form id="shipmentin-form" style="display:none;" method="POST" action="{% url 'submit_order' %}">
+                                {% csrf_token %}
+                                <div class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="barcode-input-shipmentin">Scan Barcode:</label>
+                                    <div class="col-md-9">
+                                        <input type="text" id="barcode-input-shipmentin" name="barcode" class="form-control">
+                                    </div>
+                                </div>
+                                <div hidden class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="product-name">Product:</label>
+                                    <div class="col-md-9">
+                                        <input placeholder="Auto-Filled" type="text" id="product-name" name="product-name" class="form-control" readonly>
+                                    </div>
+                                </div>
+                                <div hidden class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="quantity">Quantity:</label>
+                                    <div class="col-md-9">
+                                        <input type="number" id="quantity" name="quantity" class="form-control" value="1" min="1">
+                                    </div>
+                                </div>
+                                <!-- Date Input -->
+                                <div hidden class="row mb-3">
+                                    <label class="col-md-3 col-form-label" for="date-shipmentin">Date:</label>
+                                    <div class="col-md-9">
+                                        <input type="text" id="datepicker-shipmentin" name="date" class="form-control datepicker" placeholder="dd/mm/yyyy">
+                                    </div>
+                                </div>
+                                <input type="hidden" name="orderType" value="shipmentin">
+                                <button hidden class="btn btn-primary" type="submit">Submit ShipmentIn</button>
+                            </form>
+<br>
+                            <div>
+                            <!-- History Section -->
+
+                                </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="history-container" style="display:none;">
+                                <h4 class="header-title mt-4">Entry History</h4>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Quantity</th>
+                                            <th>Type</th>
+                                            <th>Date</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-section">
+                                        <!-- History rows will be dynamically inserted here -->
+                                    </tbody>
+                                </table>
+                                <button class="btn btn-success" id="save-entries-btn">Save Entries</button>
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function() {
+
+        var lastScannedBarcode = "";  // To store the last scanned barcode
+
+        // Set today's date as default
+        var today = new Date();
+        var formattedDate = ("0" + today.getDate()).slice(-2) + "/" + ("0" + (today.getMonth() + 1)).slice(-2) + "/" + today.getFullYear();
+        $("#datepicker").val(formattedDate);
+        $("#datepicker-return").val(formattedDate);
+        $("#datepicker-damagereturn").val(formattedDate);
+        $("#datepicker-shipmentout").val(formattedDate);
+        $("#datepicker-shipmentin").val(formattedDate);
+
+        $(".datepicker").datepicker({
+            format: 'dd/mm/yyyy',  // Ensure it matches your desired input format
+            autoclose: true
+        });
+
+
+        // Show/hide forms based on button clicks
+        $("#orderout-btn").click(function() {
+            $("#orderout-form").show();
+            $("#return-form").hide();
+            $("#damagereturn-form").hide();
+            $("#shipmentout-form").hide();
+            $("#shipmentin-form").hide();
+            $("#barcode-input-orderout").focus();
+        });
+        $("#return-btn").click(function() {
+            $("#return-form").show();
+            $("#damagereturn-form").hide();
+            $("#orderout-form").hide();
+            $("#shipmentout-form").hide();
+            $("#shipmentin-form").hide();
+            $("#barcode-input-return").focus();
+        });
+        $("#damagereturn-btn").click(function() {
+            $("#damagereturn-form").show();
+            $("#return-form").hide();
+            $("#orderout-form").hide();
+            $("#shipmentout-form").hide();
+            $("#shipmentin-form").hide();
+            $("#barcode-input-damagereturn").focus();
+        });
+        $("#shipmentout-btn").click(function() {
+            $("#shipmentout-form").show();
+            $("#return-form").hide();
+            $("#damagereturn-form").hide();
+            $("#orderout-form").hide();
+            $("#shipmentin-form").hide();
+            $("#barcode-input-shipmentout").focus();
+        })
+        $("#shipmentin-btn").click(function() {
+            $("#shipmentin-form").show();
+            $("#return-form").hide();
+            $("#damagereturn-form").hide();
+            $("#orderout-form").hide();
+            $("#shipmentout-form").hide();
+            $("#barcode-input-shipmentin").focus();
+        })
+
+        // AJAX call to fetch product details based on barcode scan
+        $(document).ready(function() {
+        // Focus on the barcode input field when the page loads
+        $("#barcode-input").focus();
+
+
+
+    // AJAX call to fetch product details based on barcode scan
+    $("#barcode-input-orderout").on("change", function() {
+    var barcodeInput = $(this);  // Reference to the current barcode input field
+    var barcode = barcodeInput.val().trim();  // Get the scanned value and trim whitespace
+
+    // Check if the barcode input is not empty
+    if (barcode === "") {
+        return; // Exit if no barcode is scanned
+    }
+
+    // Update the last scanned barcode
+    lastScannedBarcode = barcode;
+    console.log("Scanning Product ID: ", barcode); // Log the scanned product ID
+
+    // AJAX call to fetch product details based on barcode scan
+    $.ajax({
+        url: '{% url "get_product" %}',  // Django URL for fetching product
+        data: { 'product_id': barcode },  // Change this to send product_id
+        success: function(data) {
+            if (data.success) {
+                $("#product-name").val(data.product_name);  // Populate product name
+                $("#quantity").val(1);
+            } else {
+                alert("Product not found!");
+            }
+            // Clear the input field after processing
+            setTimeout(function() {
+                barcodeInput.val("");  // Clear the input field
+                barcodeInput.focus();  // Set focus back to the input
+            }, 10);  // Delay clearing for 100 milliseconds
+        },
+        error: function(xhr, status, error) {
+            console.error("Error fetching product:", error); // Debug log for errors
+            // Clear the input field in case of error
+            setTimeout(function() {
+                barcodeInput.val("");  // Clear the input field
+                barcodeInput.focus();  // Set focus back to the input
+            }, 10);  // Delay clearing for 100 milliseconds
+        }
+    });
+});
+    $("#barcode-input-return").on("change", function() {
+    var barcodeInput = $(this);  // Reference to the current barcode input field
+    var barcode = barcodeInput.val().trim();  // Get the scanned value and trim whitespace
+
+    // Check if the barcode input is not empty
+    if (barcode === "") {
+        return; // Exit if no barcode is scanned
+    }
+
+    // Update the last scanned barcode
+    lastScannedBarcode = barcode;
+    console.log("Scanning Product ID: ", barcode); // Log the scanned product ID
+
+    // AJAX call to fetch product details based on barcode scan
+    $.ajax({
+        url: '{% url "get_product" %}',  // Django URL for fetching product
+        data: { 'product_id': barcode },  // Change this to send product_id
+        success: function(data) {
+            if (data.success) {
+                $("#product-name").val(data.product_name);  // Populate product name
+                $("#quantity").val(1);
+            } else {
+                alert("Product not found!");
+            }
+            // Clear the input field after processing
+            setTimeout(function() {
+                barcodeInput.val("");  // Clear the input field
+                barcodeInput.focus();  // Set focus back to the input
+            }, 100);  // Delay clearing for 100 milliseconds
+        },
+        error: function(xhr, status, error) {
+            console.error("Error fetching product:", error); // Debug log for errors
+            // Clear the input field in case of error
+            setTimeout(function() {
+                barcodeInput.val("");  // Clear the input field
+                barcodeInput.focus();  // Set focus back to the input
+            }, 100);  // Delay clearing for 100 milliseconds
+        }
+    });
+});
+    $("#barcode-input-damagereturn").on("change", function() {
+    var barcodeInput = $(this);  // Reference to the current barcode input field
+    var barcode = barcodeInput.val().trim();  // Get the scanned value and trim whitespace
+
+    // Check if the barcode input is not empty
+    if (barcode === "") {
+        return; // Exit if no barcode is scanned
+    }
+
+    // Update the last scanned barcode
+    lastScannedBarcode = barcode;
+    console.log("Scanning Product ID: ", barcode); // Log the scanned product ID
+
+    // AJAX call to fetch product details based on barcode scan
+    $.ajax({
+        url: '{% url "get_product" %}',  // Django URL for fetching product
+        data: { 'product_id': barcode },  // Change this to send product_id
+        success: function(data) {
+            if (data.success) {
+                $("#product-name").val(data.product_name);  // Populate product name
+                $("#quantity").val(1);
+            } else {
+                alert("Product not found!");
+            }
+            // Clear the input field after processing
+            setTimeout(function() {
+                barcodeInput.val("");  // Clear the input field
+                barcodeInput.focus();  // Set focus back to the input
+            }, 100);  // Delay clearing for 100 milliseconds
+        },
+        error: function(xhr, status, error) {
+            console.error("Error fetching product:", error); // Debug log for errors
+            // Clear the input field in case of error
+            setTimeout(function() {
+                barcodeInput.val("");  // Clear the input field
+                barcodeInput.focus();  // Set focus back to the input
+            }, 100);  // Delay clearing for 100 milliseconds
+        }
+    });
+});
+    $("#barcode-input-shipmentout").on("change", function() {
+    var barcodeInput = $(this);  // Reference to the current barcode input field
+    var barcode = barcodeInput.val().trim();  // Get the scanned value and trim whitespace
+
+    // Check if the barcode input is not empty
+    if (barcode === "") {
+        return; // Exit if no barcode is scanned
+    }
+
+    // Update the last scanned barcode
+    lastScannedBarcode = barcode;
+    console.log("Scanning Product ID: ", barcode); // Log the scanned product ID
+
+    // AJAX call to fetch product details based on barcode scan
+    $.ajax({
+        url: '{% url "get_product" %}',  // Django URL for fetching product
+        data: { 'product_id': barcode },  // Change this to send product_id
+        success: function(data) {
+            if (data.success) {
+                $("#product-name").val(data.product_name);  // Populate product name
+                $("#quantity").val(1);
+            } else {
+                alert("Product not found!");
+            }
+            // Clear the input field after processing
+            setTimeout(function() {
+                barcodeInput.val("");  // Clear the input field
+                barcodeInput.focus();  // Set focus back to the input
+            }, 100);  // Delay clearing for 100 milliseconds
+        },
+        error: function(xhr, status, error) {
+            console.error("Error fetching product:", error); // Debug log for errors
+            // Clear the input field in case of error
+            setTimeout(function() {
+                barcodeInput.val("");  // Clear the input field
+                barcodeInput.focus();  // Set focus back to the input
+            }, 100);  // Delay clearing for 100 milliseconds
+        }
+    });
+});
+    $("#barcode-input-shipmentin").on("change", function() {
+    var barcodeInput = $(this);  // Reference to the current barcode input field
+    var barcode = barcodeInput.val().trim();  // Get the scanned value and trim whitespace
+
+    // Check if the barcode input is not empty
+    if (barcode === "") {
+        return; // Exit if no barcode is scanned
+    }
+
+    // Update the last scanned barcode
+    lastScannedBarcode = barcode;
+    console.log("Scanning Product ID: ", barcode); // Log the scanned product ID
+
+    // AJAX call to fetch product details based on barcode scan
+    $.ajax({
+        url: '{% url "get_product" %}',  // Django URL for fetching product
+        data: { 'product_id': barcode },  // Change this to send product_id
+        success: function(data) {
+            if (data.success) {
+                $("#product-name").val(data.product_name);  // Populate product name
+                $("#quantity").val(1);
+            } else {
+                alert("Product not found!");
+            }
+            // Clear the input field after processing
+            setTimeout(function() {
+                barcodeInput.val("");  // Clear the input field
+                barcodeInput.focus();  // Set focus back to the input
+            }, 100);  // Delay clearing for 100 milliseconds
+        },
+        error: function(xhr, status, error) {
+            console.error("Error fetching product:", error); // Debug log for errors
+            // Clear the input field in case of error
+            setTimeout(function() {
+                barcodeInput.val("");  // Clear the input field
+                barcodeInput.focus();  // Set focus back to the input
+            }, 100);  // Delay clearing for 100 milliseconds
+        }
+    });
+});
+});
+
+
+        // AJAX form submission for OrderOut
+        $("#orderout-form").on("submit", function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: $(this).attr("action"),
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        updateHistory("OrderOut", response.data);
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        });
+
+        // AJAX form submission for Return
+        $("#return-form").on("submit", function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: $(this).attr("action"),
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        updateHistory("Return", response.data);
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        });
+
+        $("#damagereturn-form").on("submit", function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: $(this).attr("action"),
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        updateHistory("DamageReturn", response.data);
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        });
+
+        $("#shipmentout-form").on("submit", function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: $(this).attr("action"),
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        updateHistory("ShipmentOut", response.data);
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        });
+
+        $("#shipmentin-form").on("submit", function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: $(this).attr("action"),
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        updateHistory("ShipmentIn", response.data);
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        });
+
+        function updateHistory(entryType, data) {
+    var historySection = $("#history-section");
+
+    // Check if the product with the same entry type already exists in the table
+    var existingRow = historySection.find(`tr`).filter(function() {
+        var productName = $(this).find("td:eq(0)").text();  // Get product name from the first cell
+        var existingEntryType = $(this).find("td:eq(2)").text();  // Get entry type from the third cell
+        return productName === data.product_name && existingEntryType === entryType;  // Check both product name and entry type
+    });
+
+    if (existingRow.length) {
+        // If the product and entry type already exist, update the quantity
+        var currentQuantity = parseInt(existingRow.find("td:eq(1)").text(), 10);
+        var newQuantity = currentQuantity + data.quantity;
+        existingRow.find("td:eq(1)").text(newQuantity);  // Update the quantity
+    } else {
+        // If the product or entry type doesn't exist, add a new row
+        var newRow = `
+            <tr id="entry-${data.id}">
+                <td>${data.product_name}</td>
+                <td>${data.quantity}</td>
+                <td>${entryType}</td>
+                <td>${data.date}</td>
+                <td>
+                    <button class="minus-button" data-id="${data.id}">-</button>
+                </td>
+            </tr>
+        `;
+        historySection.append(newRow);
+    }
+
+    $("#history-container").show();  // Show the history container if hidden
+}
+
+// Attach event listener for minus buttons (using event delegation, outside of the updateHistory function)
+$("#history-section").on("click", ".minus-button", function () {
+    var row = $(this).closest('tr');
+    var currentQuantity = parseInt(row.find("td:eq(1)").text(), 10);
+
+    // Decrease the quantity by 1
+    var newQuantity = currentQuantity - 1;
+
+    if (newQuantity > 0) {
+        row.find("td:eq(1)").text(newQuantity);  // Update quantity in the table
+    } else {
+        row.remove();  // Remove the row if quantity is 0
+    }
+});
+
+
+
+        // Handle Save Entries button click
+        $("#save-entries-btn").on("click", function() {
+    var entries = [];
+    // Iterate through the history section to collect all the rows
+    $("#history-section tr").each(function() {
+        var productName = $(this).find("td:eq(0)").text();  // Get Product Name
+        var quantity = $(this).find("td:eq(1)").text();  // Get Quantity
+        var orderType = $(this).find("td:eq(2)").text();  // Get Order Type
+        var date = $(this).find("td:eq(3)").text();  // Get Date
+
+        // Add each entry to the entries array
+        entries.push({
+            'product_name': productName,
+            'quantity': quantity,
+            'order_type': orderType,
+            'date': date
+        });
+    });
+
+    // Send the entries to the server via AJAX
+    $.ajax({
+        type: "POST",
+        url: "{% url 'save_entries' %}",  // The Django URL to save entries
+        data: {
+            'entries': JSON.stringify(entries),  // Send the entries as JSON
+            'csrfmiddlewaretoken': '{{ csrf_token }}'  // Include CSRF token
+        },
+        success: function(response) {
+            if (response.success) {
+                alert("Entries saved successfully!");
+                // Optionally clear the history section
+                $("#history-section").empty();
+                $("#history-container").hide();
+            } else {
+                alert("Failed to save entries: " + response.message);
+            }
+        }
+    });
+});
+    });
+
+</script>
+
+{% endblock %}

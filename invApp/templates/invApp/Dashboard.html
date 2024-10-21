@@ -1,0 +1,309 @@
+{% extends "invApp/layout.html" %}
+
+
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block title %} Dashboard {% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Ensure jQuery is loaded -->
+    <script src="{% static 'js/scripts.js' %}"></script>
+    <script>
+        $('#startDatePicker').datepicker({
+        // Customize start date picker
+        });
+
+        $('#endDatePicker').datepicker({
+        // Customize end date picker
+        });
+    </script>
+</head>
+
+
+<body>
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+
+                <div style="margin-right:50px;margin-bottom:10px" class="page-title-right">
+                    <form id="excelForm" class="d-flex">
+                        <div style="height:7px" class="input-group">
+                            <input type="text" name="startDate" class="form-control form-control-light" id="startDatePicker" placeholder="StartDate">
+                            <span class="input-group-text bg-primary border-primary text-white">
+                                <i class="mdi mdi-calendar-range font-13"></i>
+                            </span>
+                        </div>
+
+
+                        <span style="margin-left:10px; margin-right:10px" class="my-1">To</span>
+
+                        <div style="height:7px" class="input-group">
+                            <input type="text" name="endDate" class="form-control form-control-light" id="endDatePicker" placeholder="EndDate">
+                            <span class="input-group-text bg-primary border-primary text-white">
+                                <i class="mdi mdi-calendar-range font-13"></i>
+                            </span>
+                        </div>
+                        &nbsp;
+
+
+                        <button style="height:37px;margin-left:13px" class="input-group-text btn btn-primary" type="submit">Generate Excel</button>
+                    </form>
+
+                </div>
+                <h4 class="page-title">Dashboard</h4>
+            </div>
+        </div>
+    </div>
+
+        <div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div style="margin-right:50px;margin-bottom:10px" class="page-title-right">
+                <form id="monthFilterForm" class="d-flex">
+                    <div style="width:330px" class="input-group">
+                        <!-- Month Selection Dropdown -->
+                        <select name="selectedMonth" class="form-select" id="selectedMonth">
+                            <option value="">Select Month</option>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+
+                        <!-- Year Selection Dropdown -->
+                        <select name="year" class="form-control">
+                            <option value="">Select Year</option>
+                            {% for year in years %}
+                                <option value="{{ year }}">{{ year }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <button class="btn btn-primary" type="submit">Filter</button>
+                    </div>
+                </form>
+            </div>
+            <h4 class="page-title">Overview</h4>
+        </div>
+    </div>
+</div>
+
+        <br>
+        <div class="row">
+    <div class="col-md-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-6">
+                        <h5 class="text-muted fw-normal mt-0 text-truncate" title="New Leads">Orders</h5>
+                        <h3 id="totalOrders" class="my-2 py-1">{{ total_orders_count }}</h3>
+                        <p class="mb-0 font-13 text-muted" style="font-size:large">Yesterday: <span class="mt-0 text-success fw-semibold mb-1">{{ total_orders_count }}</span></p>
+                        <p class="mb-0 font-13 text-muted" style="font-size:large">Last 7 Days: <span class="mt-0 text-success fw-semibold mb-1">{{ total_orders_count }}</span></p>
+                        <p class="mb-0 font-13 text-muted" style="width:max-content">Last 15 Days: <span class="mt-0 text-success fw-semibold mb-1">{{ total_orders_count }}</span></p>
+                        <p class="mb-0 font-13 text-muted" style="font-size:large">Last Month: <span class="mt-0 text-success fw-semibold mb-1">{{ total_orders_count }}</span></p>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-end">
+                            <div id="campaign-sent-chart" data-colors="#727cf5"></div>
+                        </div>
+                    </div>
+                </div> <!-- end row-->
+            </div> <!-- end card-body -->
+        </div> <!-- end card -->
+    </div> <!-- Orders Section -->
+
+    <div class="col-md-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-6">
+                        <h5 class="text-muted fw-normal mt-0 text-truncate" title="New Leads">Returns</h5>
+                        <h3 id="totalReturns" class="my-2 py-1">{{ total_returns_count }}</h3>
+                        <p class="mb-0 font-13 text-muted" style="font-size:large">Yesterday: <span class="mt-0 text-success fw-semibold mb-1">{{ total_returns_count }}</span></p>
+                        <p class="mb-0 font-13 text-muted" style="font-size:large">Last 7 Days: <span class="mt-0 text-success fw-semibold mb-1">{{ total_returns_count }}</span></p>
+                        <p class="mb-0 font-13 text-muted" style="width:max-content">Last 15 Days: <span class="mt-0 text-success fw-semibold mb-1">{{ total_returns_count }}</span></p>
+                        <p class="mb-0 font-13 text-muted" style="font-size:large">Last Month: <span class="mt-0 text-success fw-semibold mb-1">{{ total_returns_count }}</span></p>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-end">
+                            <div id="new-leads-chart" data-colors="#0acf97"></div>
+                        </div>
+                    </div>
+                </div> <!-- end row-->
+            </div> <!-- end card-body -->
+        </div> <!-- end card -->
+    </div> <!-- Returns Section -->
+
+    <div class="col-md-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-6">
+                        <h5 class="text-muted fw-normal mt-0 text-truncate" title="New Leads">Shipment Out</h5>
+                        <h3 id="totalShipmentOut" class="my-2 py-1">{{ total_shipment_out_count }}</h3>
+                        <p class="mb-0 font-13 text-muted" style="font-size:large">Yesterday: <span class="mt-0 text-success fw-semibold mb-1">{{ total_shipment_out_count }}</span></p>
+                        <p class="mb-0 font-13 text-muted" style="font-size:large">Last 7 Days: <span class="mt-0 text-success fw-semibold mb-1">{{ total_shipment_out_count }}</span></p>
+                        <p class="mb-0 font-13 text-muted" style="width:max-content">Last 15 Days: <span class="mt-0 text-success fw-semibold mb-1">{{ total_shipment_out_count }}</span></p>
+                        <p class="mb-0 font-13 text-muted" style="font-size:large">Last Month: <span class="mt-0 text-success fw-semibold mb-1">{{ total_shipment_out_count }}</span></p>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-end">
+                            <div id="deals-chart" data-colors="#727cf5"></div>
+                        </div>
+                    </div>
+                </div> <!-- end row-->
+            </div> <!-- end card-body -->
+        </div> <!-- end card -->
+    </div> <!-- ShipmentOut Section -->
+
+    <div class="col-md-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-6">
+                        <h5 class="text-muted fw-normal mt-0 text-truncate" title="New Leads">Shipment In</h5>
+                        <h3 id="totalShipmentIn" class="my-2 py-1">{{ total_shipment_in_count }}</h3>
+                        <p class="mb-0 font-13 text-muted" style="font-size:large">Yesterday: <span class="mt-0 text-success fw-semibold mb-1">{{ total_shipment_in_count }}</span></p>
+                        <p class="mb-0 font-13 text-muted" style="font-size:large">Last 7 Days: <span class="mt-0 text-success fw-semibold mb-1">{{ total_shipment_in_count }}</span></p>
+                        <p class="mb-0 font-13 text-muted" style="width:max-content">Last 15 Days: <span class="mt-0 text-success fw-semibold mb-1">{{ total_shipment_in_count }}</span></p>
+                        <p class="mb-0 font-13 text-muted" style="font-size:large">Last Month: <span class="mt-0 text-success fw-semibold mb-1">{{ total_shipment_in_count }}</span></p>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-end">
+                            <div id="booked-revenue-chart" data-colors="#0acf97"></div>
+                        </div>
+                    </div>
+                </div> <!-- end row-->
+            </div> <!-- end card-body -->
+        </div> <!-- end card -->
+    </div> <!-- ShipmentIn Section -->
+</div>
+
+        <h4>Products</h4>
+         <br>
+
+        <div class="row">
+    <div class="col-xxl-9">
+        <div class="row">
+            {% for product in products %}
+            <div class="col-xl-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex">
+                            <div class="flex-grow-1 ms-3">
+                                <h2 class="mt-0 mb-1 mx-3 font-21">{{ product.ProductName }}</h2>
+                                <p class="mb-0 mx-3 font-15 text-muted">Available: <span class="mt-0 text-info fw-semibold mb-1">{{ product.TotalAvailable }}</span></p>
+                            </div>
+                        </div>
+
+                        <div class="row align-items-end justify-content-between mt-3">
+                            <div class="col-sm-7">
+                                <div class="flex-shrink-1">
+                                    <h5 class="mt-0 text-muted fw-semibold mb-1">Stock In: <span class="mt-0 text-success fw-semibold mb-1">{{ product.TotalStockInCount}}</span></h5>
+
+                                    {% if selected_month != 0 %}
+                                        <h5 class="mt-0 text-muted fw-semibold mb-1">Order Out: <span class="mt-0 text-danger fw-semibold mb-1">{{ product.TotalOrdersCountForMonth }}</span></h5>
+                                        <h5 class="mt-0 text-muted fw-semibold mb-1">Returns: <span class="mt-0 text-success fw-semibold mb-1">{{ product.TotalReturnsCountForMonth }}</span></h5>
+                                        <h5 class="mt-0 text-muted fw-semibold mb-1">Shipment Out:<span class="mt-0 text-danger fw-semibold mb-1">{{ product.TotalShipmentOutCountForMonth }}</span></h5>
+                                        <h5 class="mt-0 text-muted fw-semibold mb-1">Shipment In: <span class="mt-0 text-success fw-semibold mb-1">{{ product.TotalShipmentInCountForMonth }}</span></h5>
+                                        <h5 class="mt-0 text-muted fw-semibold mb-1">ProductOnHold: <span class="mt-0 text-warning fw-semibold mb-1">{{ product.TotalProductOnHoldCountForMonth }}</span></h5>
+                                    {% else %}
+                                        <h5 class="mt-0 text-muted fw-semibold mb-1">Order Out: <span class="mt-0 text-danger fw-semibold mb-1">{{ product.TotalOrdersCount }}</span></h5>
+                                        <h5 class="mt-0 text-muted fw-semibold mb-1">Returns: <span class="mt-0 text-success fw-semibold mb-1">{{ product.TotalReturnsCount }}</span></h5>
+                                        <h5 class="mt-0 text-muted fw-semibold mb-1">Shipment Out:<span class="mt-0 text-danger fw-semibold mb-1">{{ product.TotalShipmentsOutCount }}</span></h5>
+                                        <h5 class="mt-0 text-muted fw-semibold mb-1">Shipment In: <span class="mt-0 text-success fw-semibold mb-1">{{ product.TotalShipmentsInCount }}</span></h5>
+                                        <h5 class="mt-0 text-muted fw-semibold mb-1">ProductOnHold: <span class="mt-0 text-warning fw-semibold mb-1">{{ product.TotalProductOnHoldCount }}</span></h5>
+                                    {% endif %}
+                                </div>
+                            </div> <!-- end col -->
+
+                            <div class="col-sm-5">
+                                <div class="text-end">
+                                    <div id="currency-btc-chart" data-colors="#727cf5"></div>
+                                </div>
+                            </div> <!-- end col -->
+                        </div>
+                    </div> <!-- end card-body -->
+                </div> <!-- end card -->
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xxl-3">
+         <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="header-title mb-0">Top Selling Products</h4>
+        </div>
+        <br />
+        <div class="card-body py-0 mb-2">
+            {% for topsell in top_selling_products %}
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-grow-1 ms-2">
+                        <a href="javascript:void(0);" class="h4 my-0 fw-semibold text-secondary">{{ topsell.product__name }} : {{ topsell.total_orders }}</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="header-title mb-0">Top Return Products</h4>
+            </div>
+            <br />
+            {% for topreturn in top_return_products %}
+            <div class="card-body py-0 mb-2" data-simplebar style="max-height: 388px;">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0"></div>
+                    <div class="flex-grow-1 ms-2">
+                        <a href="javascript:void(0);" class="h4 my-0 fw-semibold text-secondary">{{ topreturn.ProductName }} : {{ topreturn.ReturnPercentage }}%</a>
+                    </div>
+                    <a href="javascript:void(0);" class="font-16 text-muted"><i class="uil uil-angle-right-b"></i></a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+
+    </div>
+</div>
+{% endblock %}
+
+<!-- Scripts Section -->
+{% block scripts %}
+    $(document).ready(function () {
+    $('#basic-datatable').DataTable();
+
+    $('#startDatePicker').datepicker({
+        // Customize start date picker
+    });
+
+    $('#endDatePicker').datepicker({
+        // Customize end date picker
+    });
+});
+
+{% endblock %}
+</body>
+</html>
+
+
