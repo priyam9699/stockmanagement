@@ -129,8 +129,9 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'invApp', 'assets')]
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Simplified static file serving.
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Disable collectstatic for Heroku if DISABLE_COLLECTSTATIC environment variable is set
+if os.environ.get('DISABLE_COLLECTSTATIC'):
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
