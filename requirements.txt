@@ -36,12 +36,10 @@ pipenv==2024.0.2
 platformdirs==4.3.6
 psycopg2==2.9.10
 psycopg2-binary==2.9.10
-PyAudio==0.2.14
 pycparser==2.22
 PyMuPDF==1.24.11
 PyPDF2==3.0.1
 pypdfium2==4.30.0
-pypiwin32==223
 python-barcode==0.15.1
 python-dateutil==2.9.0.post0
 pyttsx3==2.90
