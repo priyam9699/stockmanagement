@@ -28,7 +28,12 @@ SECRET_KEY = 'django-insecure-&slb^ryxok-5-20hgkwpqbvx+ks&lqd+grtl6euus6q0nd6pot
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.31.243', 'stocksystem-b9e8af48f059.herokuapp.com/']
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    '192.168.31.243',
+    'stocksystem-b9e8af48f059.herokuapp.com',  # Add your Heroku app's domain here
+]
 
 
 
