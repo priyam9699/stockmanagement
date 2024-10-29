@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import Product, UserProfile, OrderOut, ShipmentOut, Return, ShipmentIn, StockIn, DamageReturn, ProductOnHold, ComboProduct
 
+
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
@@ -39,6 +40,9 @@ class ProductForm(forms.ModelForm):
                 'id': 'id_subsection',
             }),
         }
+
+class UploadFileForm(forms.Form):
+    file = forms.FileField(label='Select an Excel file')
 
 
 class ComboProductForm(forms.ModelForm):

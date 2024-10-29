@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.http import JsonResponse
 from django.urls import reverse
-from .forms import ProductForm, RegistrationForm, OrderOutForm, ShipmentOutForm, ReturnForm, ShipmentInForm, StockInForm, DamageReturnForm, ProductOnHoldForm, ComboProductForm
+from .forms import ProductForm, RegistrationForm, OrderOutForm, ShipmentOutForm, ReturnForm, ShipmentInForm, StockInForm, DamageReturnForm, ProductOnHoldForm, ComboProductForm, UploadFileForm
 from .models import Product, UserProfile, OrderOut, ShipmentOut, Return, ShipmentIn, StockIn, DamageReturn, ProductOnHold, ComboProduct
 from django.contrib.auth.decorators import login_required
 import barcode
@@ -32,6 +32,8 @@ from datetime import datetime
 from django.db.models.functions import ExtractMonth, ExtractYear
 from django.utils import timezone
 from PyPDF2 import PdfReader, PdfWriter
+from django.utils.timezone import now, timedelta
+import pandas as pd
 
 
 
@@ -58,26 +60,75 @@ def dashboard_view(request):
         # Handle the case where the user profile does not exist
         return render(request, 'invApp/dashboard.html', {'error': 'Profile not found for this user'})
 
+    today = now().date()  # Get today's date
+    yesterday = today - timedelta(days=1)
+    last_7_days = today - timedelta(days=7)
+    last_15_days = today - timedelta(days=15)
+    last_month = today.replace(day=1) - timedelta(days=1)
+
     total_orders_count = OrderOut.objects.filter(user__userprofile__company_name=current_company_name).aggregate(total=Sum('quantity'))['total'] or 0
+    orders_yesterday = OrderOut.objects.filter(
+        user__userprofile__company_name=current_company_name,
+        date=yesterday
+    ).aggregate(total=Sum('quantity'))['total'] or 0
+
+    orders_last_7_days = OrderOut.objects.filter(
+        user__userprofile__company_name=current_company_name,
+        date__gte=last_7_days
+    ).aggregate(total=Sum('quantity'))['total'] or 0
+
+    orders_last_15_days = OrderOut.objects.filter(
+        user__userprofile__company_name=current_company_name,
+        date__gte=last_15_days
+    ).aggregate(total=Sum('quantity'))['total'] or 0
+
+    orders_last_month = OrderOut.objects.filter(
+        user__userprofile__company_name=current_company_name,
+        date__year=last_month.year,
+        date__month=last_month.month
+    ).aggregate(total=Sum('quantity'))['total'] or 0
+
     total_returns_count = Return.objects.filter(user__userprofile__company_name=current_company_name).aggregate(total=Sum('quantity'))['total'] or 0
     total_shipment_in_count = ShipmentIn.objects.filter(user__userprofile__company_name=current_company_name).aggregate(total=Sum('quantity'))['total'] or 0
     total_shipment_out_count = ShipmentOut.objects.filter(user__userprofile__company_name=current_company_name).aggregate(total=Sum('quantity'))['total'] or 0
-
+    total_productonhold_count = ProductOnHold.objects.filter(user__userprofile__company_name=current_company_name).aggregate(total=Sum('quantity'))['total'] or 0
 
     products = Product.objects.all()
 
     products_data = []
+    low_stock_products = []
     for product in products:
+        # Calculate totals for each product over the last 15 days
+        total_orders_out_15_days = get_total(OrderOut.objects.filter(product=product, date__gte=last_15_days),
+                                             'quantity')
+        total_shipment_out_15_days = get_total(ShipmentOut.objects.filter(product=product, date__gte=last_15_days),
+                                               'quantity')
+
+        # Calculate the average daily consumption for the product
+        total_consumed_15_days = total_orders_out_15_days + total_shipment_out_15_days
+        average_daily_consumption = total_consumed_15_days / 15 if total_consumed_15_days > 0 else 0
+
         # Calculate totals for each product
         total_orders_out = get_total(OrderOut.objects.filter(product=product), 'quantity')
         total_returns_in = get_total(Return.objects.filter(product=product), 'quantity')
         total_shipment_in = get_total(ShipmentIn.objects.filter(product=product), 'quantity')
         total_shipment_out = get_total(ShipmentOut.objects.filter(product=product), 'quantity')
-        total_stock_in =   get_total(StockIn.objects.filter(product=product), 'quantity')
+        total_stock_in = get_total(StockIn.objects.filter(product=product), 'quantity')
+        total_productonhold = get_total(ProductOnHold.objects.filter(product=product), 'quantity')
 
         # Calculate TotalAvailable using the provided formula
         total_available = (total_stock_in + total_returns_in + total_shipment_in) - (
                     total_orders_out + total_shipment_out)
+
+        # Check if available stock is less than the required stock for the next 15 days
+        required_stock_for_15_days = average_daily_consumption * 15
+        if total_available < required_stock_for_15_days:
+            low_stock_products.append({
+                'ProductName': product.name,
+                'TotalAvailable': total_available,
+                'AverageDailyConsumption': average_daily_consumption,
+                'RequiredStockFor15Days': required_stock_for_15_days,
+            })
 
 
         products_data.append({
@@ -117,9 +168,58 @@ def dashboard_view(request):
         'products': products_data,
         'top_selling_products': top_selling_products,
         'selected_month': selected_month,
+        'orders_yesterday': orders_yesterday,
+        'orders_last_7_days': orders_last_7_days,
+        'orders_last_15_days': orders_last_15_days,
+        'orders_last_month': orders_last_month,
+        'low_stock_products': low_stock_products,
     }
 
     return render(request, 'invApp/dashboard.html', context)
+
+
+def upload_excel_view(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = request.FILES['file']
+            try:
+                # Read the Excel file using pandas
+                df = pd.read_excel(file)
+
+                # Assuming your Excel file has the following columns:
+                # 'Product Name', 'Quantity', 'Order Date', etc.
+                for index, row in df.iterrows():
+                    product_name = row['Product Name']
+                    quantity = row['Quantity']
+                    order_date = row['Order Date']
+                    shipment_out = row['ShipmentOut']  # If you want to handle shipments
+
+                    # Get or create product by name
+                    product, created = Product.objects.get_or_create(name=product_name)
+
+                    # Add data to the OrderOut table
+                    OrderOut.objects.create(
+                        product=product,
+                        quantity=quantity,
+                        date=order_date,
+                    )
+
+                    # Optionally handle ShipmentOut
+                    ShipmentOut.objects.create(
+                        product=product,
+                        quantity=shipment_out,
+                        date=order_date,
+                    )
+
+                messages.success(request, 'Data successfully uploaded and saved!')
+                return redirect('dashboard')  # Redirect to dashboard or relevant page
+            except Exception as e:
+                messages.error(request, f"Error reading the file: {e}")
+    else:
+        form = UploadFileForm()
+
+    return render(request, 'invApp/upload_excel.html', {'form': form})
 
 
 # Register
@@ -357,7 +457,6 @@ def productonhold_create(request):
     return render(request, 'invApp/productonhold_create.html', {'form': form})
 
 
-
 # Read (List) View
 @login_required
 def product_list_view(request):
@@ -384,6 +483,7 @@ def product_list_view(request):
     }
 
     return render(request, 'invApp/product_list.html', context)
+
 
 def combo_create(request):
     if request.method == 'POST':
@@ -976,16 +1076,32 @@ def scan_here(request):
     return render(request, 'invApp/barcode_scan.html')
 
 
-
 def get_product(request):
     # Get product_id from the request
-    product_id = request.GET.get('product_id')  # Make sure your AJAX sends this parameter
+    product_id = request.GET.get('product_id')
+
     try:
-        # Fetch product using product_id
-        product = Product.objects.get(product_id=product_id)
-        return JsonResponse({'success': True, 'product_name': product.name, 'quantity': product.quantity})
-    except Product.DoesNotExist:
-        return JsonResponse({'success': False, 'message': 'Product not found!'})
+        # First, check if the product_id corresponds to a combo
+        combo = ComboProduct.objects.get(combo_id=product_id)
+        combo_products = combo.products.all()  # Assuming a many-to-many field named 'products' in Combo
+
+        # Prepare response data for combo products
+        product_data = [
+            {'product_name': prod.name, 'quantity': prod.quantity}
+            for prod in combo_products
+        ]
+
+        return JsonResponse({'success': True, 'combo': True, 'products': product_data})
+
+    except ComboProduct.DoesNotExist:
+        # If not a combo, check for an individual product
+        try:
+            product = Product.objects.get(product_id=product_id)
+            return JsonResponse(
+                {'success': True, 'combo': False, 'product_name': product.name, 'quantity': product.quantity})
+
+        except Product.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Product not found!'})
 
 
 @csrf_exempt
@@ -1009,6 +1125,7 @@ def submit_order(request):
                     'date': date_str  # Include date in response if needed
                 }
             }
+
             return JsonResponse(response_data)
         except Product.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Product not found!'})
@@ -1018,20 +1135,17 @@ def submit_order(request):
         return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
+
 @csrf_exempt
 def save_entries(request):
     if request.method == 'POST':
         try:
             entries = json.loads(request.POST.get('entries'))
-            print("Entries received:", entries)  # Debug: Log received entries
+            print("Entries received:", entries)
             for entry in entries:
                 product = Product.objects.get(name=entry['product_name'])
-                print(
-                    f"Processing product: {product.name}, Order Type: {entry['order_type']}, Quantity: {entry['quantity']}")  # Log product processing
 
                 if entry['order_type'].lower() == 'orderout':
-                    print(
-                        f"Saving OrderOut: user={request.user}, product={product}, date={entry['date']}, quantity={entry['quantity']}")
                     OrderOut.objects.create(
                         user=request.user,
                         product=product,
@@ -1042,9 +1156,6 @@ def save_entries(request):
 
                 elif entry['order_type'].lower() == 'return':
 
-                    print(
-                        f"Saving Return: user={request.user}, product={product}, date={entry['date']}, quantity={entry['quantity']}")
-
                     Return.objects.create(
                         user=request.user,
                         product=product,
@@ -1054,9 +1165,6 @@ def save_entries(request):
                     )
 
                 elif entry['order_type'].lower() == 'damagereturn':
-
-                    print(
-                        f"Saving DamageReturn: user={request.user}, product={product}, date={entry['date']}, quantity={entry['quantity']}")
 
                     DamageReturn.objects.create(
                         user=request.user,
@@ -1132,17 +1240,11 @@ def export_products_to_excel(request):
     return response
 
 
-
+#Label Crop
 @login_required
 def label_crop_view(request):
     return render(request, 'invApp/labelcrop.html')  # Ensure 'label_crop.html' exists in your templates folder
 
-
-import re
-import io
-import PyPDF2
-from django.http import HttpResponse
-from django.shortcuts import render
 
 def extract_sku_and_quantity(page_text):
     """Extract SKU and Quantity from the page text."""

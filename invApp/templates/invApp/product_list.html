@@ -44,6 +44,17 @@
         });
     });
 </script>
+    <script>
+    $(document).ready(function () {
+        $('#startDatePicker').datepicker({
+            // Set options for the start date picker
+        });
+
+        $('#endDatePicker').datepicker({
+            // Set options for the end date picker
+        });
+    });
+    </script>
 
 
 </head>
@@ -231,21 +242,6 @@
         </div> <!-- end row -->
     </div> <!-- container -->
 </div> <!-- content -->
-{% endblock %}
-
-<!-- Scripts Section -->
-{% block scripts %}
-    $(document).ready(function () {
-    $('#basic-datatable').DataTable();
-
-    $('#startDatePicker').datepicker({
-        // Customize start date picker
-    });
-
-    $('#endDatePicker').datepicker({
-        // Customize end date picker
-    });
-});
 
 {% endblock %}
 </body>

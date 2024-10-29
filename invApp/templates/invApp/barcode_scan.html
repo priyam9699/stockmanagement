@@ -1,3 +1,4 @@
+
 {% extends "invApp/layout.html" %}
 {% block content %}
 <!DOCTYPE html>
@@ -352,8 +353,6 @@
         // Focus on the barcode input field when the page loads
         $("#barcode-input").focus();
 
-
-
     // AJAX call to fetch product details based on barcode scan
     $("#barcode-input-orderout").on("change", function() {
     var barcodeInput = $(this);  // Reference to the current barcode input field
@@ -395,6 +394,7 @@
         }
     });
 });
+
     $("#barcode-input-return").on("change", function() {
     var barcodeInput = $(this);  // Reference to the current barcode input field
     var barcode = barcodeInput.val().trim();  // Get the scanned value and trim whitespace
@@ -435,6 +435,7 @@
         }
     });
 });
+
     $("#barcode-input-damagereturn").on("change", function() {
     var barcodeInput = $(this);  // Reference to the current barcode input field
     var barcode = barcodeInput.val().trim();  // Get the scanned value and trim whitespace
@@ -475,6 +476,7 @@
         }
     });
 });
+
     $("#barcode-input-shipmentout").on("change", function() {
     var barcodeInput = $(this);  // Reference to the current barcode input field
     var barcode = barcodeInput.val().trim();  // Get the scanned value and trim whitespace
@@ -515,6 +517,7 @@
         }
     });
 });
+
     $("#barcode-input-shipmentin").on("change", function() {
     var barcodeInput = $(this);  // Reference to the current barcode input field
     var barcode = barcodeInput.val().trim();  // Get the scanned value and trim whitespace
@@ -555,6 +558,7 @@
         }
     });
 });
+
 });
 
 
@@ -674,8 +678,8 @@
     $("#history-container").show();  // Show the history container if hidden
 }
 
-// Attach event listener for minus buttons (using event delegation, outside of the updateHistory function)
-$("#history-section").on("click", ".minus-button", function () {
+        // Attach event listener for minus buttons (using event delegation, outside of the updateHistory function)
+        $("#history-section").on("click", ".minus-button", function () {
     var row = $(this).closest('tr');
     var currentQuantity = parseInt(row.find("td:eq(1)").text(), 10);
 
@@ -688,8 +692,6 @@ $("#history-section").on("click", ".minus-button", function () {
         row.remove();  // Remove the row if quantity is 0
     }
 });
-
-
 
         // Handle Save Entries button click
         $("#save-entries-btn").on("click", function() {
