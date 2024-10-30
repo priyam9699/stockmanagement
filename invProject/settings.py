@@ -34,10 +34,7 @@ ALLOWED_HOSTS = [
     '192.168.31.243',
     'stocksystem-b9e8af48f059.herokuapp.com',  # Add your Heroku app's domain here
 ]
-<<<<<<< HEAD
 
-=======
->>>>>>> 21adc9161fb36880c82cb61dc1a1e2faae73b517
 
 
 
