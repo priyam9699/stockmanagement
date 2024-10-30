@@ -34,7 +34,10 @@ ALLOWED_HOSTS = [
     '192.168.31.243',
     'stocksystem-b9e8af48f059.herokuapp.com',  # Add your Heroku app's domain here
 ]
+<<<<<<< HEAD
 
+=======
+>>>>>>> 21adc9161fb36880c82cb61dc1a1e2faae73b517
 
 
 
@@ -135,8 +138,9 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'invApp', 'assets')]
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Simplified static file serving.
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Disable collectstatic for Heroku if DISABLE_COLLECTSTATIC environment variable is set
+if os.environ.get('DISABLE_COLLECTSTATIC'):
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
